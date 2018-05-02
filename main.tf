@@ -37,7 +37,7 @@ resource "aws_lambda_permission" "sns_notify_slack" {
 resource "aws_s3_bucket_object" "notify_slack" {
   bucket         = "calderalabs-terraform"
   key            = "notify_slack"
-  content_base64 = "${base64(file(data.archive_file.notify_slack.output_path))}"
+  content_base64 = "${base64encode(file(data.archive_file.notify_slack.output_path))}"
   content_type   = "application/octet-stream"
 }
 
