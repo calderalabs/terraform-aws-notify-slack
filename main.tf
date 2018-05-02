@@ -42,7 +42,7 @@ resource "aws_lambda_function" "notify_slack" {
   function_name    = "${var.lambda_function_name}"
   role             = "${aws_iam_role.lambda.arn}"
   handler          = "notify_slack.lambda_handler"
-  source_code_hash = "${sha256(base64gzip(file(locals.source_path)))}"
+  source_code_hash = "${sha256(base64gzip(file(local.source_path)))}"
   runtime          = "python3.6"
   timeout          = 30
   kms_key_arn      = "${var.kms_key_arn}"
