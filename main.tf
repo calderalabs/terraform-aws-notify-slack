@@ -38,7 +38,7 @@ resource "aws_s3_bucket_object" "notify_slack" {
   bucket = "calderalabs-terraform"
   key    = "notify_slack"
   source = "${data.archive_file.notify_slack.output_path}"
-  etag   = "${md5(file(${data.archive_file.notify_slack.output_path}))}"
+  etag   = "${md5(file(data.archive_file.notify_slack.output_path))}"
 }
 
 resource "aws_lambda_function" "notify_slack" {
