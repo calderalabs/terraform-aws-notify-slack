@@ -12,6 +12,7 @@ resource "aws_sns_topic" "this" {
 
 locals {
   sns_topic_arn = "${element(compact(concat(aws_sns_topic.this.*.arn, data.aws_sns_topic.this.*.arn)), 0)}"
+  source_path   = "${path.module}/functions/notify_slack.py"
 }
 
 resource "aws_sns_topic_subscription" "sns_notify_slack" {
@@ -28,17 +29,11 @@ resource "aws_lambda_permission" "sns_notify_slack" {
   source_arn    = "${local.sns_topic_arn}"
 }
 
-data "archive_file" "notify_slack" {
-  type        = "zip"
-  source_file = "${path.module}/functions/notify_slack.py"
-  output_path = "${path.module}/functions/notify_slack.zip"
-}
-
 resource "aws_s3_bucket_object" "notify_slack" {
-  bucket = "calderalabs-terraform"
-  key    = "notify_slack"
-  source = "${data.archive_file.notify_slack.output_path}"
-  etag   = "${md5(file(data.archive_file.notify_slack.output_path))}"
+  bucket         = "calderalabs-terraform"
+  key            = "notify_slack"
+  content_base64 = "${base64gzip(file(locals.source_path))}"
+  content_type   = "application/gzip"
 }
 
 resource "aws_lambda_function" "notify_slack" {
@@ -47,7 +42,7 @@ resource "aws_lambda_function" "notify_slack" {
   function_name    = "${var.lambda_function_name}"
   role             = "${aws_iam_role.lambda.arn}"
   handler          = "notify_slack.lambda_handler"
-  source_code_hash = "${data.archive_file.notify_slack.output_base64sha256}"
+  source_code_hash = "${sha256(base64gzip(file(locals.source_path)))}"
   runtime          = "python3.6"
   timeout          = 30
   kms_key_arn      = "${var.kms_key_arn}"
