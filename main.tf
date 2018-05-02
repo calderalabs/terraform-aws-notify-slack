@@ -34,8 +34,16 @@ data "archive_file" "notify_slack" {
   output_path = "${path.module}/functions/notify_slack.zip"
 }
 
+resource "aws_s3_bucket_object" "notify_slack" {
+  bucket = "calderalabs-terraform"
+  key    = "notify_slack"
+  source = "${data.archive_file.notify_slack.output_path}"
+  etag   = "${md5(file(${data.archive_file.notify_slack.output_path}))}"
+}
+
 resource "aws_lambda_function" "notify_slack" {
-  filename         = "${data.archive_file.notify_slack.output_path}"
+  s3_bucket        = "calderalabs-terraform"
+  s3_key           = "notify_slack"
   function_name    = "${var.lambda_function_name}"
   role             = "${aws_iam_role.lambda.arn}"
   handler          = "notify_slack.lambda_handler"
