@@ -32,7 +32,7 @@ resource "aws_lambda_permission" "sns_notify_slack" {
 resource "aws_s3_bucket_object" "notify_slack" {
   bucket         = "calderalabs-terraform"
   key            = "notify_slack"
-  content_base64 = "${base64gzip(file(locals.source_path))}"
+  content_base64 = "${base64gzip(file(local.source_path))}"
   content_type   = "application/gzip"
 }
 
